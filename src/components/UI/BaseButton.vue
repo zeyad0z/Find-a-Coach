@@ -17,7 +17,7 @@ export default {
     },
     link: {
       type: Boolean,
-      default: "false",
+      default: false,
       required: false,
     },
     to: {
