@@ -76,7 +76,6 @@
     <p v-if="!areas.isValid">Please select at least one Expertise.</p>
     <br />
     <p v-if="!formIsValid">Please fix the above errors and submit again.</p>
-    <div></div>
     <base-button>Register</base-button>
   </form>
 </template>
