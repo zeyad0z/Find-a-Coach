@@ -4,7 +4,11 @@ import requestsGetters from "./getters.js";
 
 export default {
   namespaced: true,
-  state() {},
+  state() {
+    return {
+      requests: [],
+    };
+  },
   mutations: requestsMutations,
   actions: requestsActions,
   getters: requestsGetters,
