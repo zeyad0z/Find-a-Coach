@@ -5,12 +5,15 @@
   <section>
     <base-card>
       <div class="controls">
-        <base-button mode="outline">Refresh</base-button>
-        <base-button link to="/register" v-if="!isCoach"
+        <base-button mode="outline" @click="loadCoaches">Refresh</base-button>
+        <base-button link to="/register" v-if="!isCoach && !isLoading"
           >regitser as coach</base-button
         >
       </div>
-      <ul v-if="hasCoaches">
+      <div v-if="isLoading">
+        <base-spinner></base-spinner>
+      </div>
+      <ul v-else-if="hasCoaches">
         <coach-item
           v-for="coach in filteredCoaches"
           :key="coach.id"
@@ -29,7 +32,6 @@
 <script>
 import CoachFilter from "@/components/coaches/CoachFilter.vue";
 import CoachItem from "../../components/coaches/CoachItem.vue";
-import { mapGetters } from "vuex";
 
 export default {
   components: {
@@ -38,6 +40,8 @@ export default {
   },
   data() {
     return {
+      error: null,
+      isLoading: false,
       filters: {
         frontend: true,
         backend: true,
@@ -49,9 +53,9 @@ export default {
     isCoach() {
       return this.$store.getters["coaches/isCoach"];
     },
-    ...mapGetters({
-      hasCoaches: "coaches/hasCoaches",
-    }),
+    hasCoaches() {
+      return !this.isLoading && this.$store.getters["coaches/hasCoaches"];
+    },
     filteredCoaches() {
       const coaches = this.$store.getters["coaches/coaches"];
       return coaches.filter((coach) => {
@@ -68,9 +72,22 @@ export default {
       });
     },
   },
+  created() {
+    this.loadCoaches();
+  },
   methods: {
     setFilter(updatedFilters) {
       this.filters = updatedFilters;
+    },
+    async loadCoaches() {
+      this.isLoading = true;
+      try {
+        await this.$store.dispatch("coaches/fetchCoaches");
+      } catch (error) {
+        this.error = error.message || "Somthing went wrong!";
+        console.log(error);
+      }
+      this.isLoading = false;
     },
   },
 };
