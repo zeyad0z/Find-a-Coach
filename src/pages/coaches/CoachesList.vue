@@ -1,11 +1,16 @@
 <template>
+  <base-dialog :show="!!error" title="An error occurred!" @close="handleError">
+    <p>{{ error }}</p>
+  </base-dialog>
   <section>
     <coach-filter @change-filter="setFilter"></coach-filter>
   </section>
   <section>
     <base-card>
       <div class="controls">
-        <base-button mode="outline" @click="loadCoaches">Refresh</base-button>
+        <base-button mode="outline" @click="loadCoaches(true)"
+          >Refresh</base-button
+        >
         <base-button link to="/register" v-if="!isCoach && !isLoading"
           >regitser as coach</base-button
         >
@@ -79,15 +84,20 @@ export default {
     setFilter(updatedFilters) {
       this.filters = updatedFilters;
     },
-    async loadCoaches() {
+    async loadCoaches(refresh = false) {
       this.isLoading = true;
       try {
-        await this.$store.dispatch("coaches/fetchCoaches");
+        await this.$store.dispatch("coaches/loadCoaches", {
+          forceRefresh: refresh,
+        });
       } catch (error) {
         this.error = error.message || "Somthing went wrong!";
         console.log(error);
       }
       this.isLoading = false;
+    },
+    handleError() {
+      this.error = null;
     },
   },
 };

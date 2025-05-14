@@ -11,8 +11,12 @@
     <p class="errors" v-if="!formIsValid">
       Please enter a valid email and non-empty message.
     </p>
+    <p class="errors" v-if="error">{{ error }}</p>
     <div class="actions">
-      <base-button>Send Message</base-button>
+      <base-button :disabled="isLoading">
+        <span v-if="isLoading">Sending...</span>
+        <span v-else>Send Message</span>
+      </base-button>
     </div>
   </form>
 </template>
@@ -24,11 +28,15 @@ export default {
       email: "",
       message: "",
       formIsValid: true,
+      isLoading: false,
+      error: null,
     };
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       this.formIsValid = true;
+      this.error = null;
+
       if (
         this.email === "" ||
         !this.email.includes("@") ||
@@ -37,12 +45,22 @@ export default {
         this.formIsValid = false;
         return;
       }
-      this.$store.dispatch("requests/contactCoach", {
-        email: this.email,
-        message: this.message,
-        coachId: this.$route.params.id,
-      });
-      this.$router.replace("/coaches");
+
+      this.isLoading = true;
+
+      try {
+        await this.$store.dispatch("requests/contactCoach", {
+          email: this.email,
+          message: this.message,
+          coachId: this.$route.params.id,
+        });
+        this.$router.replace("/coaches");
+      } catch (error) {
+        this.error =
+          error.message || "Failed to send message. Please try again later.";
+      } finally {
+        this.isLoading = false;
+      }
     },
   },
 };

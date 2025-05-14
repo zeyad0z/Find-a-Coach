@@ -15,9 +15,13 @@ export default {
     CoachForm,
   },
   methods: {
-    saveData(data) {
-      this.$store.dispatch("coaches/registerCoach", data);
-      this.$router.replace("/coaches");
+    async saveData(data) {
+      try {
+        await this.$store.dispatch("coaches/registerCoach", data);
+        this.$router.replace("/coaches");
+      } catch (error) {
+        // Error is already handled in the form component
+      }
     },
   },
 };
