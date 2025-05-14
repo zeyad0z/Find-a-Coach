@@ -1,5 +1,6 @@
 <template>
-  <div v-if="isLoading">
+  <div>
+    <div v-if="isLoading">
     <base-spinner></base-spinner>
   </div>
   <div v-else-if="error">
@@ -32,6 +33,7 @@
         <p>{{ description }}</p>
       </base-card>
     </section>
+  </div>
   </div>
 </template>
 
