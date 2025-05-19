@@ -51,6 +51,10 @@ export default {
           case "INVALID_PASSWORD":
             errorMessage = "Invalid password. Please check your password.";
             break;
+          case "INVALID_LOGIN_CREDENTIALS":
+            errorMessage =
+              "Invalid email or password. Please check your credentials and try again.";
+            break;
           case "USER_DISABLED":
             errorMessage = "This user account has been disabled.";
             break;
