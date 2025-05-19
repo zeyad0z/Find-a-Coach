@@ -33,8 +33,6 @@
 </template>
 
 <script>
-import { handleError } from "vue";
-
 export default {
   data() {
     return {
@@ -81,11 +79,26 @@ export default {
       try {
         if (this.mode === "login") {
           await this.$store.dispatch("login", actionPayload);
+
+          if (this.$route.query.redirect === "register") {
+            await this.$store.dispatch("coaches/loadCoaches", {
+              forceRefresh: true,
+            });
+
+            if (this.$store.getters["coaches/isCoach"]) {
+              this.$router.replace("/coaches");
+            } else {
+              this.$router.replace("/register");
+            }
+          } else {
+            const redirectUrl = "/" + (this.$route.query.redirect || "coaches");
+            this.$router.replace(redirectUrl);
+          }
         } else {
           await this.$store.dispatch("signup", actionPayload);
+          const redirectUrl = "/" + (this.$route.query.redirect || "coaches");
+          this.$router.replace(redirectUrl);
         }
-        const redirectUrl = "/" + (this.$route.query.redirect || "coaches");
-        this.$router.replace(redirectUrl);
       } catch (error) {
         this.error =
           error.message || "Failed to authenticate, try again later.";

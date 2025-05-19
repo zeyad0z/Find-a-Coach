@@ -32,9 +32,33 @@ export default {
     });
     const responseData = await response.json();
     if (!response.ok) {
-      const error = new Error(
-        responseData.message || "Failed to authenticate. Check your login data."
-      );
+      let errorMessage = "Failed to authenticate. Check your login data.";
+      if (responseData.error && responseData.error.message) {
+        // Handle Firebase specific error messages
+        switch (responseData.error.message) {
+          case "EMAIL_EXISTS":
+            errorMessage = "This email is already registered.";
+            break;
+          case "OPERATION_NOT_ALLOWED":
+            errorMessage = "Password sign-in is disabled for this project.";
+            break;
+          case "TOO_MANY_ATTEMPTS_TRY_LATER":
+            errorMessage = "Too many attempts. Try again later.";
+            break;
+          case "EMAIL_NOT_FOUND":
+            errorMessage = "Email not found. Please check your email.";
+            break;
+          case "INVALID_PASSWORD":
+            errorMessage = "Invalid password. Please check your password.";
+            break;
+          case "USER_DISABLED":
+            errorMessage = "This user account has been disabled.";
+            break;
+          default:
+            errorMessage = responseData.error.message;
+        }
+      }
+      const error = new Error(errorMessage);
       throw error;
     }
 
@@ -66,8 +90,8 @@ export default {
     }
 
     timer = setTimeout(function () {
-      context.dispatch("autoLogout"), expiresIn;
-    });
+      context.dispatch("autoLogout");
+    }, expiresIn);
 
     if (token && userId) {
       context.commit("setUser", {

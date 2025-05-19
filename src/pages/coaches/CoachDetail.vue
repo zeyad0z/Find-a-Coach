@@ -44,8 +44,6 @@
 </template>
 
 <script>
-import router from "@/router";
-
 export default {
   props: ["id"],
   data() {
@@ -62,21 +60,23 @@ export default {
     async loadCoach() {
       this.isLoading = true;
       try {
-        // First try to get from current store state
+        // Check if we should update from server (either no data or data is stale)
+        const shouldUpdate = this.$store.getters["coaches/shouldUpdate"];
+
+        // Always load coaches from server on page refresh
+        if (shouldUpdate) {
+          await this.$store.dispatch("coaches/loadCoaches", {
+            forceRefresh: true,
+          });
+        }
+
+        // Now try to find the coach in the updated store
         this.selectedCoach = this.$store.getters["coaches/coaches"].find(
           (coach) => coach.id === this.id
         );
 
-        // If not found, try to load coaches from server
         if (!this.selectedCoach) {
-          await this.$store.dispatch("coaches/loadCoaches");
-          this.selectedCoach = this.$store.getters["coaches/coaches"].find(
-            (coach) => coach.id === this.id
-          );
-
-          if (!this.selectedCoach) {
-            this.error = "Coach not found!";
-          }
+          this.error = "Coach not found!";
         }
       } catch (error) {
         this.error = error.message || "Something went wrong!";
@@ -90,6 +90,9 @@ export default {
       return this.selectedCoach.firstName + " " + this.selectedCoach.lastName;
     },
     contactLink() {
+      if (this.$route.path.includes("contact")) {
+        return this.$route.path.replace("/contact", "");
+      }
       return this.$route.path + "/contact";
     },
     rate() {
